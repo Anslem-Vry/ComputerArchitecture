@@ -39,13 +39,13 @@ encoding:
 	la $t2, tiger
 
 	add $a3, $a0, 0x10000		# Store the value for the end of the bitmap array.
-		la $t7, Output				# Load the address of Output into $t7.
+	la $t7, Output			# Load the address of Output into $t7.
 Stego:
 
 	lbu $t0, 0($t2) 				# Loads the data in the address of $t2 into $t0
 	lbu $t5, 0($t1)				# Loads the data in the address of $t1 into $t5
 	
-	add $t3, $t3, 0xF0			# Put the binary value 11110000 into $t3, this is the mask.
+	add $t3, $zero, 0xF0			# Put the binary value 11110000 into $t3, this is the mask.
 
 	and $t3, $t3, $t0			# "Nobody cared who I was until I put on the mask..."  (Puts the mask on.) The mask makes all of the LSBs of the image be hidden by 0s.
 	srl $t4, $t5, 4				# Shift the value in $t1 right by 4 bits, stored in $t4. This moves the secret images MSBs into it's LSBs and fills the MSBs with 0s.
@@ -73,7 +73,7 @@ BitmapDisplay:
 	#lui $s7, 0x1004				# Send to the Heap.
 	
 BitmapLoop:
-	lw $t7, 0($a0)
+	lw  $t7, 0($a0)
 	sw $t7, 0($a0)
 	
 	addi $a0, $a0, 4
