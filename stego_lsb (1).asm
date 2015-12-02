@@ -38,7 +38,7 @@ encoding:
 	la $a0, ronaldo
 	la $t2, tiger
 
-	add $a3, $a0, 0x10000		# Store the value for the end of the bitmap array.
+	add $a1, $a0, 0x10000		# Store the value for the end of the bitmap array.
 	la $t7, Output			# Load the address of Output into $t7.
 Stego:
 
@@ -59,7 +59,7 @@ Stego:
 	addi $t2, $t2, 1				# Increment the pointer in the "tiger" array by 1.
 	addi $a0, $a0, 1
 	
-	blt $a0, $a3, Stego
+	blt $a0, $a1, Stego
 		
 	jr $ra  # every function ends with this instruction
 	
@@ -84,14 +84,31 @@ BitmapLoop:
 	jr $ra  # every function ends with this instruction
 decoding:
 # instruction go here....
-
-	and $t2, $t7, $t3			# Stores the four MSB into a new variable as they are the cover image
-	sll $t3, $t7, 4				# Shifts the four LSB to be in the MSB position. This is the secret image
 	
-	addi $t7, $t7, 1				# Increment the pointer in the output array by 1.
-	addi $t1, $t1, 1				# Increment the pointer in the "ronaldo"array by 1.
-	addi $t2, $t2, 1				# Increment the pointer in the "tiger" array by 1.
+	la $a2, Output 				# Load the address of the output into $a2
+	la $t1, Output
+	la $t5, tiger
+	la $t4, ronaldo
+	
+	addi $a3, $a0, 0x10000			#add the size of the array to the first pointer to find the end point of the output
+Destego:
+	addi $t3, $zero, 0xF0			# Creates mask of 11110000
+	
+	and $t2, $t7, $t3			# Stores the four MSB into a new variable as they are the cover image
+	sb $t2, 0($t5) 				# $t5 will display the cover image. The current bit is saved into this array
+	
+	sll $t6, $t7, 4				# Shifts the four LSB to be in the MSB position. This is the secret image
+	sb $t6, 0($t4)				# Stores the scrent image into the $t4 array
+	
+#	addi $t7, $t7, 1				# Increment the pointer in the output array by 1.
+#	addi $t1, $t1, 1				# Increment the pointer in the "ronaldo"array by 1.
+#	addi $t2, $t2, 1				# Increment the pointer in the "tiger" array by 1.
 
-	blt $a0, $a3, Stego
+	addi $a2, $a2, 1				# add 1 to the array pointer as conversion is done byte by byte
+	addi $t1, $t1, 1
+	addi $t4, $t4, 1
+	addi $t5, $t5, 1
+
+	blt $a2, $a3, Stego
 
 	jr $ra
