@@ -50,15 +50,12 @@ Stego:
 	lbu $t0, 0($t2) 			# Loads the data in the address of $t2 into $t0
 	lbu $t5, 0($t1)				# Loads the data in the address of $t1 into $t5
 	
-	#add $t3, $zero, 0xF0			# Put the binary value 11110000 into $t3, this is the mask.
-
-	#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 	#MODIFYING THE MASK BASED ON USER INPUT#	
 	add $t3, $zero, 0xFF 			#Set the mask to be 8 bits of 1's (1111 1111)
 	lbu $t8, inputValue			#Load the value from the data segment into $t8 for later processing.
 	sll $t9,$t8,2				#Multiply the contents in  $t8 by 4 and store it in $t9.
 	sub $t9, $t9, 1				#Subtract 1 from $t9 contents.
-	sub $t3, $t3, $t9			#Subtract the inputted value from the original mask to get the user defined mask
+	sub $t3, $t3, $t9				#Subtract the inputted value from the original mask to get the user defined mask
 	#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 	and $t3, $t3, $t0			# "Nobody cared who I was until I put on the mask..."  (Puts the mask on.) The mask makes all of the LSBs of the image be hidden by 0s.
@@ -82,14 +79,11 @@ BitmapDisplay:
 	sll $t0, $t0, 2
 	add $a1, $a0, $t0
 	
-	#lui $s7, 0x1004				# Send to the Heap.
-	
 BitmapLoop:
 	lw  $t7, 0($a0)
 	sw $t7, 0($a0)
 	
 	add $a0, $a0, 4
-#addi $s7, $s7, 4
 	
 	blt $a0, $a1, BitmapLoop
 
@@ -98,7 +92,6 @@ BitmapLoop:
 	
 	
 decoding:
-# instruction go here....
 	
 	la $a2, Output 				# Load the address of the output into $a2
 	la $t1, Output
@@ -128,7 +121,7 @@ Destego:
 # BITMAP DISPLAY AFTER DECODING
 
 BitmapDisplay2:
-	addi $t0, $zero, 65536		# 128*256 = 32768
+	addi $t0, $zero, 65536		# 256*256 = 65536
 	la $a2, Output
 	
 	sll $t0, $t0, 4
