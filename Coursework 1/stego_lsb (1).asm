@@ -13,12 +13,11 @@ inputValue:.byte 6
 
 # call to encoding
 # set the values of the functions parameters in registers $ai
-	jal setup 				#The setup function initialises all of the t registers.
-	#jal variedInputValue				
+	jal setup 				#The setup function initialises all of the t registers.				
 	jal encoding
 	jal BitmapDisplay
-
-#jal decoding
+	jal decoding
+	jal BitmapDisplay2
 
 
 # exit
@@ -63,7 +62,7 @@ Stego:
 	#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 	and $t3, $t3, $t0			# "Nobody cared who I was until I put on the mask..."  (Puts the mask on.) The mask makes all of the LSBs of the image be hidden by 0s.
-	srl $t4, $t5, 4				# Shift the value in $t1 right by a user defined amount of bits, stored in $t4. This moves the secret images MSBs into it's LSBs and fills the MSBs with 0s.
+	srl $t4, $t5, 4				# Shift the value in $t5 right by a user defined amount of bits, stored in $t4. This moves the secret images MSBs into it's LSBs and fills the MSBs with 0s.
 	add $t6, $t4, $t3			# Add the cover image and secret image together. This produces the stegonography image, where one image is hidden within the other.
 
 	sb $t6, 0($t7)				# Store the current pixel in the array.
@@ -89,12 +88,15 @@ BitmapLoop:
 	lw  $t7, 0($a0)
 	sw $t7, 0($a0)
 	
-	add $a0, $a0, 4 #
+	add $a0, $a0, 4
 #addi $s7, $s7, 4
 	
 	blt $a0, $a1, BitmapLoop
 
 	jr $ra  # every function ends with this instruction
+	
+	
+	
 decoding:
 # instruction go here....
 	
@@ -104,24 +106,41 @@ decoding:
 	la $t4, ronaldo
 	
 	addi $a3, $a0, 0x10000			#add the size of the array to the first pointer to find the end point of the output
-Destego:
-	addi $t3, $zero, 0xF0			# Creates mask of 11110000
 	
-	and $t2, $t7, $t3			# Stores the four MSB into a new variable as they are the cover image
-	sb $t2, 0($t5) 				# $t5 will display the cover image. The current bit is saved into this array
+Destego:
+	addi $t3, $zero, 0xF0			# Recreates mask of 11110000
+	
+	and $t2, $t7, $t3			# Stores the four MSB of the output into a new variable as they are the cover image
+	sb $t2, 0($t5) 				# $t5 will display the cover image(Tiger). The current bit is saved into this array.
 	
 	sll $t6, $t7, 4				# Shifts the four LSB to be in the MSB position. This is the secret image
-	sb $t6, 0($t4)				# Stores the scrent image into the $t4 array
+	sb $t6, 0($t4)				# Stores the secret image into the $t4 array
 	
-#	addi $t7, $t7, 1				# Increment the pointer in the output array by 1.
-#	addi $t1, $t1, 1				# Increment the pointer in the "ronaldo"array by 1.
-#	addi $t2, $t2, 1				# Increment the pointer in the "tiger" array by 1.
-
+	addi $t7, $t7, 1				# Increment the pointer in the output array by 1.
+	addi $t6, $t6, 1				# Increment the pointer in the "ronaldo"array by 1.
+	addi $t2, $t2, 1				# Increment the pointer in the "tiger" array by 1.
 	addi $a2, $a2, 1				# add 1 to the array pointer as conversion is done byte by byte
-	addi $t1, $t1, 1
-	addi $t4, $t4, 1
-	addi $t5, $t5, 1
 
-	blt $a2, $a3, Stego
+	blt $a2, $a3, Destego
+
+	jr $ra
+
+# BITMAP DISPLAY AFTER DECODING
+
+BitmapDisplay2:
+	addi $t0, $zero, 65536		# 128*256 = 32768
+	la $a2, Output
+	
+	sll $t0, $t0, 4
+	add $a3, $a2, $t0
+
+	
+BitmapLoop2:
+	lw  $t7, 0($a2)
+	sw $t7, 0($a2)
+	
+	add $a2, $a2, 4
+	
+	blt $a2, $a3, BitmapLoop2
 
 	jr $ra
