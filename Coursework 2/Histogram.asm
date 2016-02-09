@@ -6,9 +6,9 @@ Size:.byte 6
 
 .text
 la $a0, Image
-lw $a1, Histogram
-lw $a2, Cumulative
-lw $a3, Size
+la $a1, Histogram
+la $a2, Cumulative
+lbu  $a3, Size
 
 jal HistogramCalc
 
@@ -21,17 +21,17 @@ syscall
 HistogramCalc:
 
 		addi $t0, $zero, 0 	# Initialise t0 as it will be used as our looping variable  "i"
-		add $t0, $t0, $a0 #Add the image arguement register value to $t0
-		add $t2, $t2, $a1 #Add the Histogram arguement value to $t2
-		lw $t2, 0($t0)     # load the first value in the image and store it in $t2
-		add $a1, $a0, $t1	# Add the lower pointer to the image size to determine the end pointer
-HistLoop: 	lbu $t4, 0($t2)		# Load the current Histogram value into $t4
+	#	add $t0, $t0, $a0 #Add the image arguement register value to $t0
+	#	add $t2, $t2, $a1 #Add the Histogram arguement value to $t2
+		lbu  $t7, 0($a0)     # load the first value in the image and store it in $t2
+		add $t6, $a1, $t7	# Add the lower pointer to the image size to determine the end pointer
+HistLoop: 	lbu $t4, 0($t6)		# Load the current Histogram value into $t4
 		addi $t4, $t4, 1	# Add 1 to $t4  " Histogram [i] =  Histogram [i] + 1 "
-		sb $t4, 0($t2)		# Store this value back into Histogram
-		addi $t2, $t2, 1 	# Increment the Histogram pointer  "   i++ "
+		sb $t4, 0($t6)		# Store this value back into Histogram
 		addi $t0, $t0, 1	# Increment the indexing pointer     " i = 2^b - 1 "
+		addi $a0, $a0, 1
 
-		blt $a0, $a1, HistLoop 	# If the final pointer isn't the same as the indexing pointer, branch back to HistLoop  " i = 2^b - 1 "
+		blt $t0, $a3, HistLoop 	# If the final pointer isn't the same as the indexing pointer, branch back to HistLoop  " i = 2^b - 1 "
 		jr $ra     # end of stage 1
 
 #HistogramAdd:			
@@ -45,7 +45,7 @@ HistLoop: 	lbu $t4, 0($t2)		# Load the current Histogram value into $t4
 #			addi $a0, $a0, 1	# Increment the indexing pointer     " i = 2^b - 1 "
 #			blt $t5, $a1,  stage2Loop  # j = L = 2^b - 1		
 		
-#			jr $ra # end of stage 2
+		#	jr $ra # end of stage 2
 			
 			
 			
